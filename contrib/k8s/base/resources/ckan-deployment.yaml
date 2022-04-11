@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: odl-ckan-sandbox-ns
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+  labels:
+    app: ckan
+  name: ckan
+  namespace: odl-ckan-sandbox-ns
+spec:
+  replicas: 1
+  serviceName: ckan-service
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: ckan
+  template:
+    metadata:
+      labels:
+        app: ckan
+    spec:
+      containers:
+        - envFrom:
+          - configMapRef:
+              name: ckan-env-vars
+          image: docker_ckan
+          name: ckan
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          resources: {}
+      restartPolicy: Always

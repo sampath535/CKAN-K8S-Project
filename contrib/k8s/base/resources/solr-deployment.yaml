@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: solr
+  name: solr
+  namespace: odl-ckan-sandbox-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: solr
+  serviceName: solr-service
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: solr
+    spec:
+      containers:
+        - image: docker_solr
+          imagePullPolicy: Never
+          name: solr
+          envFrom:
+          - configMapRef:
+              name: ckan-env-vars
+          ports:
+            - containerPort: 8983
+          resources: {}
+          volumeMounts:
+            - mountPath: /opt/solr/server/solr/ckan/data
+              name: solr-data
+      restartPolicy: Always
+      volumes:
+        - name: solr-data
+          persistentVolumeClaim:
+            claimName: solr-data
+
