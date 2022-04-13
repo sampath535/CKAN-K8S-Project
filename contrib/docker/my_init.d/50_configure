@@ -3,8 +3,10 @@
 # URL for the primary database, in the format expected by sqlalchemy (required
 # unless linked to a container called 'db')
 
-# : ${DATABASE_URL:=}
-: ${DATABASE_URL:=${CKAN_SQLALCHEMY_URL}}  #<- USE WITH EXTERNAL DB ON AZURE
+
+: ${DATABASE_URL:=}
+#CHANGE TO BELOW IF USING EXTERNAL DB
+#: ${DATABASE_URL:=${CKAN_SQLALCHEMY_URL}}  #<- USE WITH EXTERNAL DB ON AZURE
 
 # URL for solr (required unless linked to a container called 'solr')
 : ${SOLR_URL:=}

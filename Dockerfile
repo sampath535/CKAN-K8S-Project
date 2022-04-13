@@ -54,12 +54,12 @@ RUN ckan-pip3 install -U pip && \
     ckan-pip3 install -e $CKAN_VENV/src/ckan/ && \
     ln -s $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini && \
     cp -v $CKAN_VENV/src/ckan/contrib/docker/ckan-entrypoint.sh /ckan-entrypoint.sh && \
-    chmod +x $CKAN_VENV/src/ckan/contrib/docker/ckan-entrypoint.sh && \
+    chmod +x /ckan-entrypoint.sh && \
     chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
 
 WORKDIR $CKAN_VENV/src/ckan/
 
-ENTRYPOINT ["/usr/lib/ckan/venv/src/ckan/contrib/docker/ckan-entrypoint.sh"]
+ENTRYPOINT ["/ckan-entrypoint.sh"]
 
 USER ckan
 EXPOSE 5000
