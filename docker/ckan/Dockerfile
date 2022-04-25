@@ -47,7 +47,7 @@ RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH && \
 ENV PATH $CKAN_VENV/bin:$PATH
 
 # Setup CKAN
-ADD . $CKAN_VENV/src/ckan/
+ADD odl-ckan-source/ $CKAN_VENV/src/ckan/
 RUN ckan-pip3 install -U pip && \
     ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
     ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements.txt && \

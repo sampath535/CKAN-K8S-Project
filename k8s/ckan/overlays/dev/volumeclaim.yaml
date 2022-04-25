@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: odlckan
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: odlckan-data # (1)
+    spec:
+      accessModes: [ ReadWriteOnce ]
+      storageClassName: odl-ckan-dev-hdd-sc
+      resources:
+        requests:
+          storage: 512Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: odlckan-data-shared-claim # (1)
+spec:
+  storageClassName: odl-ckan-dev-azfile-zrs-sc          

@@ -11,11 +11,11 @@ USER root
 RUN cp -R $SOLR_CONFIG_DIR/_default $SOLR_CONFIG_DIR/ckan
 
 # Update the schema
-ADD https://raw.githubusercontent.com/apache/lucene-solr/releases/lucene-solr/8.11.1/solr/server/solr/configsets/sample_techproducts_configs/conf/currency.xml \
-https://raw.githubusercontent.com/apache/lucene-solr/releases/lucene-solr/8.11.1/solr/server/solr/configsets/_default/conf/synonyms.txt \
-https://raw.githubusercontent.com/apache/lucene-solr/releases/lucene-solr/8.11.1/solr/server/solr/configsets/_default/conf/stopwords.txt \
-https://raw.githubusercontent.com/apache/lucene-solr/releases/lucene-solr/8.11.1/solr/server/solr/configsets/_default/conf/protwords.txt \
-https://raw.githubusercontent.com/apache/lucene-solr/releases/lucene-solr/8.11.1/solr/server/solr/configsets/sample_techproducts_configs/conf/elevate.xml \
+ADD configsets/currency.xml \
+configsets/synonyms.txt \
+configsets/stopwords.txt \
+configsets/protwords.txt \
+configsets/elevate.xml \
 $SOLR_CONFIGSETS
 
 ADD ./schema.solr8.xml $SOLR_SCHEMA_FILE

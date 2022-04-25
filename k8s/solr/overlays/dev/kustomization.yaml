@@ -1,0 +1,24 @@
+# kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# list of Resource Config to be Applied
+bases:
+  - ../../base
+
+# namespace to deploy all Resources to
+namespace: odl-ckan-dev-ns
+
+resources:
+- secretprovider.yaml
+
+patchesStrategicMerge:
+  - secretconfig.yaml
+  - pod_nodeselection.yaml
+  - resources.yaml
+  - volumeclaim.yaml  
+
+# labels added to all Resources
+commonLabels:
+  app: odlsolr
+  env: dev
