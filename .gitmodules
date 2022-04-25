@@ -1,0 +1,3 @@
+[submodule "odl-ckan-source"]
+	path = odl-ckan-source
+	url = https://dongenergy-p.visualstudio.com/DefaultCollection/Orsted%20Data%20Lake/_git/odl-ckan-source

@@ -1,0 +1,1 @@
+FROM clementmouchet/datapusher:latest

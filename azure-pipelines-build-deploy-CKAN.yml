@@ -1,0 +1,120 @@
+trigger: none
+  # branches:
+  #   include:
+  #   - master
+  # paths:
+  #   include:
+  #   - docker/*
+  #   - k8s/*
+  #   - ci/*
+  #   - azure-pipelines-build-deploy-nifi.yml
+    
+stages:
+  - stage: Build
+    jobs:
+    - job: BuildJob
+      pool:
+        vmImage: 'ubuntu-18.04'
+      strategy:
+        matrix:
+          ckan:
+            app: ckan
+            docker_image_label: ckan/odl-ckan-image:2.9.5
+            docker_image_path: ./
+          solr:
+            app: solr
+            docker_image_label: ckan/solr/odl-solr-image:8.11.1
+            docker_image_path: ./contrib/docker/solr
+      variables:
+        - name: acr_dev
+          value: datalakek8sacrdev
+        - name: acr_prod
+          value: datalakek8sacrprod
+        - name: docker_image_tag
+          value: set_in_task
+      steps:
+      - script: docker build . -t $(docker_image_label)
+        displayName: Build Image
+        workingDirectory: $(docker_image_path)
+      - task: AzureCLI@1
+        displayName: 'Push Image ACR DEV'
+        inputs:
+          azureSubscription: datalake-acr-sc-dev
+          scriptLocation: inlineScript
+          inlineScript: |
+            set -xe
+            az acr login --name $(acr_dev)
+            docker tag $(docker_image_label) $(acr_dev).azurecr.io/$(docker_image_label)
+            docker push $(acr_dev).azurecr.io/$(docker_image_label)
+
+            acr_repo=$(echo $(docker_image_label) | cut -d : -f 1)
+            echo The most recent DEV tag is: ${acr_repo}.$(az acr repository show-tags -n $(acr_dev) --top 1 --repository ${acr_repo} --orderby time_desc --output tsv)
+          workingDirectory: $(docker_image_path)
+
+
+
+
+
+
+      # - task: AzureCLI@1
+      #   displayName: 'Push Image ACR PROD'
+      #   inputs:
+      #     azureSubscription: datalake-acr-sc-prod
+      #     scriptLocation: inlineScript
+      #     inlineScript: |
+      #       set -xe
+      #       az acr login --name $(acr_prod)
+      #       docker tag $(docker_image_tag) $(acr_prod).azurecr.io/$(docker_image_tag).$(Build.BuildId)
+      #       docker push $(acr_prod).azurecr.io/$(docker_image_tag).$(Build.BuildId)
+
+      #       acr_repo=$(echo $(docker_image_tag) | cut -d : -f 1)
+      #       echo The most recent PROD tag is: ${acr_repo}.$(az acr repository show-tags -n $(acr_dev) --top 1 --repository ${acr_repo} --orderby time_desc --output tsv)
+      #     workingDirectory: ./docker/$(app)
+ 
+  # - stage: DeployDEV
+  #   dependsOn: Build
+  #   jobs:
+  #   - deployment: DeployDEV
+  #     displayName: Deploy CKAN DEV
+  #     pool:
+  #       vmImage: 'Ubuntu-18.04'
+  #     environment:  odl-dev-env.odl-ckan-dev-ns
+  #     strategy:
+  #       runOnce:
+  #         deploy:
+  #           steps:
+  #           - template: ci/deploy-steps.yml
+  #             parameters:
+  #               env: dev
+  # - stage: DeployTEST
+  #   dependsOn: Build
+  #   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+  #   jobs:
+  #   - deployment: DeployTEST
+  #     displayName: Deploy NiFi TEST
+  #     environment: odl-test-env.odl-nifi-test-ns
+  #     pool:        
+  #       vmImage: 'Ubuntu-18.04'
+  #     strategy:
+  #       runOnce:
+  #         deploy:
+  #           steps:
+  #           - template: ci/deploy-steps.yml
+  #             parameters:
+  #               env: test
+  # - stage: DeployProd
+  #   dependsOn: Build
+  #   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+  #   jobs:
+  #   - deployment: DeployProd
+  #     displayName: Deploy NiFi PROD
+  #     environment: odl-prod-env.odl-nifi-prod-ns
+  #     pool:
+  #       vmImage: 'Ubuntu-18.04'
+  #     strategy:
+  #       runOnce:
+  #         deploy:
+  #           steps:
+  #           - template: ci/deploy-steps.yml
+  #             parameters:
+  #               env: prod
