@@ -10,13 +10,13 @@ resources:
 namespace: tbd-in-overlays
 
 images:
-- name: odl-solr-image
+- name: ode-solr-image
   newName: docker_solr
   # newName: datalakek8sacrdev.azurecr.io/ckan/solr
   # newTag: (version?)
 
 commonLabels:
-  app: odlsolr
+  app: odesolr
   env: tbd-in-overlays
 
 generatorOptions:

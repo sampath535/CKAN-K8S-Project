@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: odlckan-hs
+  name: odeckan-service
   labels:
-    app: odlckan
+    app: odeckan
   annotations: 
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
@@ -13,55 +13,34 @@ spec:
       port: 5000
       targetPort: 5000
   selector:
-    app: odlckan
+    app: odeckan
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: odlckan-cs
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-  labels:
-    app: odlckan
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 443
-      name: https
-      targetPort: 5000
-  selector:
-    app: odlckan
-  sessionAffinity: ClientIP
-  sessionAffinityConfig: 
-    clientIP:
-      timeoutSeconds: 10800
----    
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   annotations:
   labels:
-    app: odlckan
-  name: odlckan
+    app: odeckan
+  name: odeckan
 spec:
   replicas: 1
-  serviceName: odlckan-hs
+  serviceName: odeckan-service
   updateStrategy:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: odlckan
+      app: odeckan
   template:
     metadata:
       labels:
-        app: odlckan
+        app: odeckan
     spec:
       initContainers:
         # Wait for postgres to show up
         - name: wait-for-pg
           image: busybox:latest
           imagePullPolicy: IfNotPresent
-          command: ['sh', '-c', 'until nc -vz ${POSTGRES_HOST}.odl-ckan-dev-ns 5432; do echo "Waiting for postgres..."; sleep 3; done;']
+          command: ['sh', '-c', 'until nc -vz ${POSTGRES_HOST}.ode-ckan-dev-ns 5432; do echo "Waiting for postgres..."; sleep 3; done;']
           envFrom:
           - configMapRef:
               name: ckan-env-vars
@@ -69,8 +48,8 @@ spec:
         - envFrom:
           - configMapRef:
               name: ckan-env-vars
-          image: odl-ckan-image
-          name: odl-ckan
+          image: ode-ckan-image
+          name: ode-ckan
           imagePullPolicy: Never
           ports:
             - containerPort: 5000
@@ -93,16 +72,16 @@ spec:
           mountPath: /etc/ckan_secrets/orstedca_secret
           readOnly: true
         - name: kvsecrets
-          subPath: odl_ckan_security_user_oidc_client_secret
-          mountPath: /etc/ckan_secrets/odl_ckan_security_user_oidc_client_secret
+          subPath: ode_ckan_security_user_oidc_client_secret
+          mountPath: /etc/ckan_secrets/ode_ckan_security_user_oidc_client_secret
           readOnly: true
         - name: kvsecrets
-          subPath: odl_ckan_trust_store_password
-          mountPath: /etc/ckan_secrets/odl_ckan_trust_store_password
+          subPath: ode_ckan_trust_store_password
+          mountPath: /etc/ckan_secrets/ode_ckan_trust_store_password
           readOnly: true
         - name: kvsecrets
-          subPath: odl_ckan_key_store_password
-          mountPath: /etc/ckan_secrets/odl_ckan_key_store_password
+          subPath: ode_ckan_key_store_password
+          mountPath: /etc/ckan_secrets/ode_ckan_key_store_password
           readOnly: true
         # configmap
         - name: ckan-config
@@ -110,9 +89,9 @@ spec:
           subPath: ckan.ini
           #ADD DATA VOLUMES BELOW LATER
       volumes:
-        - name: odlckan-data-shared
+        - name: odeckan-data-shared
           persistentVolumeClaim:
-            claimName: odlckan-data-shared-claim
+            claimName: odeckan-data-shared-claim
         - name: kvsecrets
           csi:
             driver: secrets-store.csi.k8s.io
@@ -129,16 +108,16 @@ spec:
               - key: ckan-ini
                 path: ckan-ini
       imagePullSecrets:
-      - name: odlckanregistrykey
+      - name: odeckanregistrykey
       securityContext:
         runAsUser: 1000
         fsGroup: 1000
   volumeClaimTemplates:
   - metadata:
-      name: odlckan-data
+      name: odeckan-data
     spec:
       accessModes: [ ReadWriteOnce ]
-      storageClassName: odl-ckan-sc
+      storageClassName: ode-ckan-sc
       resources:
         requests:
           storage: 32Gi

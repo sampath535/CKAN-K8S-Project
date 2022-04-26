@@ -10,11 +10,11 @@ resources:
 namespace: tbd-in-overlays
 
 commonLabels:
-  app: odldatapusher
+  app: odedatapusher
   env: tbd-in-overlays
 
 images:
-- name: odl-datapusher-image
+- name: ode-datapusher-image
   newName: clementmouchet/datapusher
   # newName: datalakek8sacrdev.azurecr.io/ckan/datapusher
   # newTag: 2.9.5

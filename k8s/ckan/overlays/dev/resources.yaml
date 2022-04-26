@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: odlckan
+  name: odeckan
 spec:
   template:
     spec:
       containers:
-      - name: odl-ckan # (1)
+      - name: ode-ckan # (1)
         resources:
           requests:
             memory: 1Gi

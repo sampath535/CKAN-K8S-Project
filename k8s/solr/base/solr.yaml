@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: odlsolr-hs
+  name: odesolr-service
   labels:
-    app: odlsolr
+    app: odesolr
   annotations: 
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
@@ -13,51 +13,30 @@ spec:
       port: 8983
       targetPort: 8983
   selector:
-    app: odlsolr
+    app: odesolr
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: odlsolr-cs
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-  labels:
-    app: odlsolr
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 443
-      name: https
-      targetPort: 8983
-  selector:
-    app: odlsolr
-  sessionAffinity: ClientIP
-  sessionAffinityConfig: 
-    clientIP:
-      timeoutSeconds: 10800
----    
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    app: odlsolr
-  name: odlsolr
+    app: odesolr
+  name: odesolr
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: odlsolr
-  serviceName: odlsolr-hs
+      app: odesolr
+  serviceName: odesolr-service
   updateStrategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app: odlsolr
+        app: odesolr
     spec:
       containers:
-        - image: odl-solr-image
-          name: odl-solr
+        - image: ode-solr-image
+          name: ode-solr
           imagePullPolicy: Never
           ports:
             - containerPort: 8983

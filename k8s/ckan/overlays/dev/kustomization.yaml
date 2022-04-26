@@ -7,20 +7,19 @@ bases:
   - ../../base
 
 # namespace to deploy all Resources to
-namespace: odl-ckan-dev-ns
+namespace: ode-ckan-dev-ns
 
 resources:
 - secretprovider.yaml
 
 patchesStrategicMerge:
   - secretconfig.yaml
-  - pod_nodeselection.yaml
   - resources.yaml
   - volumeclaim.yaml  
 
 # labels added to all Resources
 commonLabels:
-  app: odlckan
+  app: odeckan
   env: dev
 
 configMapGenerator:
