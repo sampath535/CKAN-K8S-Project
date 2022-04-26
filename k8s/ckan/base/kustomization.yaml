@@ -27,9 +27,9 @@ generatorOptions:
   disableNameSuffixHash: true
 
 configMapGenerator:
-- files:
-  - configs/production.ini
-  name: ckan-config
+# - files:
+#   - configs/production.ini
+#   name: ckan-config
 - envs:
   - .env.template
   name: ckan-env-vars
