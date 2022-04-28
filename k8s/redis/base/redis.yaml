@@ -16,7 +16,7 @@ spec:
     app: oderedis
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   labels:
     app: oderedis
@@ -26,9 +26,6 @@ spec:
   selector:
     matchLabels:
       app: oderedis
-  serviceName: oderedis-service
-  updateStrategy:
-    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -37,9 +34,33 @@ spec:
       containers:
         - image: ode-redis-image
           name: ode-redis
-          imagePullPolicy: Never
+          imagePullPolicy: Always
           ports:
             - containerPort: 6379
-          resources: {}
+              name: socket
+              protocol: TCP
+          startupProbe:
+            failureThreshold: 840
+            periodSeconds: 30
+            tcpSocket:
+              port: socket
+          readinessProbe:
+            initialDelaySeconds: 840
+            periodSeconds: 30
+            timeoutSeconds: 30
+            tcpSocket:
+              port: socket
+          livenessProbe:
+            initialDelaySeconds: 840
+            periodSeconds: 60
+            tcpSocket:
+              port: socket 
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
       restartPolicy: Always
 

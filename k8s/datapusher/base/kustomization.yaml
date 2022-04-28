@@ -15,9 +15,8 @@ commonLabels:
 
 images:
 - name: ode-datapusher-image
-  newName: clementmouchet/datapusher
-  # newName: datalakek8sacrdev.azurecr.io/ckan/datapusher
-  # newTag: 2.9.5
+  newName: datalakek8sacrdev.azurecr.io/ckan/datapusher/ode-datapusher-image
+  newTag: latest
 
 generatorOptions:
   # disableNameSuffixHash is true disables the default behavior of adding a

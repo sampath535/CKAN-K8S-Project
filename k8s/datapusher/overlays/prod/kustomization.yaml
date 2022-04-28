@@ -7,7 +7,7 @@ bases:
   - ../../base
 
 # namespace to deploy all Resources to
-namespace: ode-ckan-dev-ns
+namespace: ode-ckan-prod-ns
 
 # resources:
 # - secretprovider.yaml
@@ -19,5 +19,5 @@ namespace: ode-ckan-dev-ns
 
 # labels added to all Resources
 commonLabels:
-  app: oderedis
-  env: dev
+  app: odedatapusher
+  env: prod

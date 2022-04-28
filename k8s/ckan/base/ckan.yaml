@@ -9,24 +9,20 @@ metadata:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
   ports:
-    - name: "https"
-      port: 5000
+    - port: 5000
       targetPort: 5000
+      protocol: TCP
   selector:
     app: odeckan
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  annotations:
   labels:
     app: odeckan
   name: odeckan
 spec:
   replicas: 1
-  serviceName: odeckan-service
-  updateStrategy:
-    type: RollingUpdate
   selector:
     matchLabels:
       app: odeckan
@@ -35,24 +31,17 @@ spec:
       labels:
         app: odeckan
     spec:
-      initContainers:
-        # Wait for postgres to show up
-        - name: wait-for-pg
-          image: busybox:latest
-          imagePullPolicy: IfNotPresent
-          command: ['sh', '-c', 'until nc -vz ${POSTGRES_HOST}.ode-ckan-dev-ns 5432; do echo "Waiting for postgres..."; sleep 3; done;']
-          envFrom:
-          - configMapRef:
-              name: ckan-env-vars
       containers:
         - envFrom:
           - configMapRef:
               name: ckan-env-vars
           image: ode-ckan-image
           name: ode-ckan
-          imagePullPolicy: Never
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
+              name: client
+              protocol: TCP
           resources:
             requests:
               memory: 1Gi
@@ -60,38 +49,24 @@ spec:
             limits:
               memory: 2Gi
               cpu: 1000m
+          startupProbe:
+            failureThreshold: 840
+            periodSeconds: 30
+            tcpSocket:
+              port: client
+          readinessProbe:
+            initialDelaySeconds: 840
+            periodSeconds: 30
+            timeoutSeconds: 30
+            tcpSocket:
+              port: client
+          livenessProbe:
+            initialDelaySeconds: 840
+            periodSeconds: 60
+            tcpSocket:
+              port: client 
       restartPolicy: Always
-      volumeMounts:
-        # secrets
-        - name: kvsecrets
-          subPath: ckan0_secret
-          mountPath: /etc/ckan_secrets/ckan0_secret
-          readOnly: true
-        - name: kvsecrets
-          subPath: orstedca_secret
-          mountPath: /etc/ckan_secrets/orstedca_secret
-          readOnly: true
-        - name: kvsecrets
-          subPath: ode_ckan_security_user_oidc_client_secret
-          mountPath: /etc/ckan_secrets/ode_ckan_security_user_oidc_client_secret
-          readOnly: true
-        - name: kvsecrets
-          subPath: ode_ckan_trust_store_password
-          mountPath: /etc/ckan_secrets/ode_ckan_trust_store_password
-          readOnly: true
-        - name: kvsecrets
-          subPath: ode_ckan_key_store_password
-          mountPath: /etc/ckan_secrets/ode_ckan_key_store_password
-          readOnly: true
-        # configmap
-        - name: ckan-config
-          mountPath: /etc/ckan/production.ini
-          subPath: ckan.ini
-          #ADD DATA VOLUMES BELOW LATER
       volumes:
-        - name: odeckan-data-shared
-          persistentVolumeClaim:
-            claimName: odeckan-data-shared-claim
         - name: kvsecrets
           csi:
             driver: secrets-store.csi.k8s.io
@@ -100,24 +75,7 @@ spec:
               secretProviderClass: TBD-OVERLAY-secret-provider
             nodePublishSecretRef:
               name: kvcreds
-        # configmap 
-        - name: ckan-config
-          configMap:
-            name: ckan-config
-            items:
-              - key: ckan-ini
-                path: ckan-ini
-      imagePullSecrets:
-      - name: odeckanregistrykey
-      securityContext:
-        runAsUser: 1000
-        fsGroup: 1000
-  volumeClaimTemplates:
-  - metadata:
-      name: odeckan-data
-    spec:
-      accessModes: [ ReadWriteOnce ]
-      storageClassName: ode-ckan-sc
-      resources:
-        requests:
-          storage: 32Gi
+      volumeMounts:
+        - name: kvsecrets
+          mountPath: /etc/ckan_secrets
+          readOnly: true

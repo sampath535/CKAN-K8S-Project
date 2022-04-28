@@ -11,9 +11,8 @@ namespace: tbd-in-overlays
 
 images:
 - name: ode-ckan-image
-  newName: docker_ckan
-  # newName: datalakek8sacrdev.azurecr.io/ckan/ckan
-  # newTag: 2.9.5
+  newName: datalakek8sacrdev.azurecr.io/ckan/ode-ckan-image
+  newTag: 2.9.5
 
 # labels added to all Resources
 commonLabels:

@@ -1,13 +1,13 @@
 trigger: none
   # branches:
   #   include:
-  #   - master
+  #   - main
   # paths:
   #   include:
   #   - docker/*
   #   - k8s/*
   #   - ci/*
-  #   - azure-pipelines-build-deploy-nifi.yml
+  #   - azure-pipelines-build-deploy-CKAN.yml
     
 stages:
   - stage: Build
@@ -19,23 +19,25 @@ stages:
         matrix:
           ckan:
             app: ckan
-            docker_image_label: ckan/odl-ckan-image:2.9.5
-            docker_image_path: ./
+            docker_image_label: ckan/ode-ckan-image:2.9.5
           solr:
             app: solr
-            docker_image_label: ckan/solr/odl-solr-image:8.11.1
-            docker_image_path: ./contrib/docker/solr
+            docker_image_label: ckan/solr/ode-solr-image:8.11.1
+          redis:
+            app: redis
+            docker_image_label: ckan/redis/ode-redis-image:latest
+          datapusher:
+            app: datapusher
+            docker_image_label: ckan/datapusher/ode-datapusher-image:latest                    
       variables:
         - name: acr_dev
           value: datalakek8sacrdev
         - name: acr_prod
           value: datalakek8sacrprod
-        - name: docker_image_tag
-          value: set_in_task
       steps:
       - script: docker build . -t $(docker_image_label)
         displayName: Build Image
-        workingDirectory: $(docker_image_path)
+        workingDirectory: ./docker/$(app)
       - task: AzureCLI@1
         displayName: 'Push Image ACR DEV'
         inputs:
@@ -44,55 +46,76 @@ stages:
           inlineScript: |
             set -xe
             az acr login --name $(acr_dev)
-            docker tag $(docker_image_label) $(acr_dev).azurecr.io/$(docker_image_label)
-            docker push $(acr_dev).azurecr.io/$(docker_image_label)
+            docker tag $(docker_image_label) $(acr_dev).azurecr.io/$(docker_image_label).$(Build.BuildId)
+            docker push $(acr_dev).azurecr.io/$(docker_image_label).$(Build.BuildId)
 
             acr_repo=$(echo $(docker_image_label) | cut -d : -f 1)
             echo The most recent DEV tag is: ${acr_repo}.$(az acr repository show-tags -n $(acr_dev) --top 1 --repository ${acr_repo} --orderby time_desc --output tsv)
-          workingDirectory: $(docker_image_path)
+          workingDirectory: ./docker/$(app)
 
+      - task: AzureCLI@1
+        displayName: 'Push Image ACR PROD'
+        inputs:
+          azureSubscription: datalake-acr-sc-prod
+          scriptLocation: inlineScript
+          inlineScript: |
+            set -xe
+            az acr login --name $(acr_prod)
+            docker tag $(docker_image_label) $(acr_prod).azurecr.io/$(docker_image_label).$(Build.BuildId)
+            docker push $(acr_prod).azurecr.io/$(docker_image_label).$(Build.BuildId)
 
-
-
-
-
-      # - task: AzureCLI@1
-      #   displayName: 'Push Image ACR PROD'
-      #   inputs:
-      #     azureSubscription: datalake-acr-sc-prod
-      #     scriptLocation: inlineScript
-      #     inlineScript: |
-      #       set -xe
-      #       az acr login --name $(acr_prod)
-      #       docker tag $(docker_image_tag) $(acr_prod).azurecr.io/$(docker_image_tag).$(Build.BuildId)
-      #       docker push $(acr_prod).azurecr.io/$(docker_image_tag).$(Build.BuildId)
-
-      #       acr_repo=$(echo $(docker_image_tag) | cut -d : -f 1)
-      #       echo The most recent PROD tag is: ${acr_repo}.$(az acr repository show-tags -n $(acr_dev) --top 1 --repository ${acr_repo} --orderby time_desc --output tsv)
-      #     workingDirectory: ./docker/$(app)
+            acr_repo=$(echo $(docker_image_label) | cut -d : -f 1)
+            echo The most recent PROD tag is: ${acr_repo}.$(az acr repository show-tags -n $(acr_dev) --top 1 --repository ${acr_repo} --orderby time_desc --output tsv)
+          workingDirectory: ./docker/$(app)
  
-  # - stage: DeployDEV
-  #   dependsOn: Build
-  #   jobs:
-  #   - deployment: DeployDEV
-  #     displayName: Deploy CKAN DEV
-  #     pool:
-  #       vmImage: 'Ubuntu-18.04'
-  #     environment:  odl-dev-env.odl-ckan-dev-ns
-  #     strategy:
-  #       runOnce:
-  #         deploy:
-  #           steps:
-  #           - template: ci/deploy-steps.yml
-  #             parameters:
-  #               env: dev
+      - script: |
+            set -xe
+
+            chmod +x ../../script/installkustomize.sh
+            ../../script/installkustomize.sh
+            cp kustomize base
+
+            for env in dev; do
+
+              target_acr=$(acr_dev)
+              if [[ ${env} == "prod" ]]; then
+                target_acr=$(acr_prod)
+              fi
+
+              pushd base
+              ./kustomize edit set image ode-$(app)-image=${target_acr}.azurecr.io/$(docker_image_label).$(Build.BuildId)
+              popd  
+
+              ./kustomize build overlays/${env} -o $(Build.ArtifactStagingDirectory)/$(app)_${env}.yaml
+            done
+        displayName: Build k8s manifest
+        workingDirectory: ./k8s/$(app)
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathToPublish: $(Build.ArtifactStagingDirectory)
+          artifactName: drop              
+  - stage: DeployDEV
+    dependsOn: Build
+    jobs:
+    - deployment: DeployDEV
+      displayName: Deploy CKAN DEV
+      pool:
+        vmImage: 'Ubuntu-18.04'
+      environment:  odl-dev-env.ode-ckan-dev-ns
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - template: ci/deploy-steps.yml
+              parameters:
+                env: dev
   # - stage: DeployTEST
   #   dependsOn: Build
   #   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
   #   jobs:
   #   - deployment: DeployTEST
-  #     displayName: Deploy NiFi TEST
-  #     environment: odl-test-env.odl-nifi-test-ns
+  #     displayName: Deploy CKAN TEST
+  #     environment: odl-test-env.ode-ckan-test-ns
   #     pool:        
   #       vmImage: 'Ubuntu-18.04'
   #     strategy:
@@ -108,7 +131,7 @@ stages:
   #   jobs:
   #   - deployment: DeployProd
   #     displayName: Deploy NiFi PROD
-  #     environment: odl-prod-env.odl-nifi-prod-ns
+  #     environment: odl-prod-env.ode-ckan-prod-ns
   #     pool:
   #       vmImage: 'Ubuntu-18.04'
   #     strategy:

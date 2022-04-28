@@ -9,13 +9,13 @@ bases:
 # namespace to deploy all Resources to
 namespace: ode-ckan-dev-ns
 
-resources:
-- secretprovider.yaml
+# resources:
+# - secretprovider.yaml
 
-patchesStrategicMerge:
-  - secretconfig.yaml
-  - resources.yaml
-  - volumeclaim.yaml  
+# patchesStrategicMerge:
+#   - secretconfig.yaml
+#   - resources.yaml
+#   - volumeclaim.yaml  
 
 # labels added to all Resources
 commonLabels:

@@ -11,9 +11,8 @@ namespace: tbd-in-overlays
 
 images:
 - name: ode-redis-image
-  newName: redis
-  # newName: datalakek8sacrdev.azurecr.io/ckan/redis
-  # newTag: (version?)
+  newName: datalakek8sacrdev.azurecr.io/ckan/redis/ode-redis-image
+  newTag: latest
 
 commonLabels:
   app: oderedis
