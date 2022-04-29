@@ -65,6 +65,10 @@ spec:
             periodSeconds: 60
             tcpSocket:
               port: client 
+          volumeMounts:
+            - name: kvsecrets
+              mountPath: /etc/ckan_secrets
+              readOnly: true
       restartPolicy: Always
       volumes:
         - name: kvsecrets
@@ -75,7 +79,4 @@ spec:
               secretProviderClass: TBD-OVERLAY-secret-provider
             nodePublishSecretRef:
               name: kvcreds
-      volumeMounts:
-        - name: kvsecrets
-          mountPath: /etc/ckan_secrets
-          readOnly: true
+
