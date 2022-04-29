@@ -60,8 +60,8 @@ RUN ckan-pip3 install -U pip && \
 WORKDIR $CKAN_VENV/src/ckan/
 
 ENTRYPOINT ["/ckan-entrypoint.sh"]
+COPY ./config/production.ini $CKAN_CONFIG/
 
 USER ckan
 EXPOSE 5000
-
 CMD ["ckan","-c","/etc/ckan/production.ini", "run", "--host", "0.0.0.0"]
