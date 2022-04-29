@@ -49,22 +49,6 @@ spec:
             limits:
               memory: 2Gi
               cpu: 1000m
-          startupProbe:
-            failureThreshold: 840
-            periodSeconds: 30
-            tcpSocket:
-              port: client
-          readinessProbe:
-            initialDelaySeconds: 840
-            periodSeconds: 30
-            timeoutSeconds: 30
-            tcpSocket:
-              port: client
-          livenessProbe:
-            initialDelaySeconds: 840
-            periodSeconds: 60
-            tcpSocket:
-              port: client 
           # volumeMounts:
           #   - name: kvsecrets
           #     mountPath: /etc/ckan_secrets

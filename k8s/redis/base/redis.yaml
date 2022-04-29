@@ -39,22 +39,6 @@ spec:
             - containerPort: 6379
               name: socket
               protocol: TCP
-          startupProbe:
-            failureThreshold: 840
-            periodSeconds: 30
-            tcpSocket:
-              port: socket
-          readinessProbe:
-            initialDelaySeconds: 840
-            periodSeconds: 30
-            timeoutSeconds: 30
-            tcpSocket:
-              port: socket
-          livenessProbe:
-            initialDelaySeconds: 840
-            periodSeconds: 60
-            tcpSocket:
-              port: socket 
           resources:
             limits:
               cpu: 500m
