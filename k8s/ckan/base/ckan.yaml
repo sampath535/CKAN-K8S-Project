@@ -65,18 +65,18 @@ spec:
             periodSeconds: 60
             tcpSocket:
               port: client 
-          volumeMounts:
-            - name: kvsecrets
-              mountPath: /etc/ckan_secrets
-              readOnly: true
+          # volumeMounts:
+          #   - name: kvsecrets
+          #     mountPath: /etc/ckan_secrets
+          #     readOnly: true
       restartPolicy: Always
-      volumes:
-        - name: kvsecrets
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: TBD-OVERLAY-secret-provider
-            nodePublishSecretRef:
-              name: kvcreds
+      # volumes:
+      #   - name: kvsecrets
+      #     csi:
+      #       driver: secrets-store.csi.k8s.io
+      #       readOnly: true
+      #       volumeAttributes:
+      #         secretProviderClass: TBD-OVERLAY-secret-provider
+      #       nodePublishSecretRef:
+      #         name: kvcreds
 
