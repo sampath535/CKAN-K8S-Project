@@ -34,7 +34,7 @@ spec:
       containers:
         - image: ode-datapusher-image
           name: ode-datapusher
-          imagePullPolicy: Never
+          imagePullPolicy: Always
           ports:
             - containerPort: 8800
               name: socket
