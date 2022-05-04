@@ -44,6 +44,8 @@ ckan_deb/DEBIAN/prerm
 # node.js
 node_modules/
 
+.env.bad
+docker/.env
 # docker
 contrib/docker/.env
 cypress.env.json

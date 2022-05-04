@@ -1,3 +1,34 @@
 #*.po -diff
 *.mo -diff
-* text eol=lf
+*.env eol=lf
+*.yaml eol=lf
+*.yml eol=lf
+*.ini eol=lf
+*.wsgi eol=lf
+
+
+# (binary is a macro for -text -diff)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.flv binary
+*.fla binary
+*.swf binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.pyc binary
+*.pdf binary
+
+
+*.ttf     -text diff
+*.eot     -text diff
+*.woff    -text diff
+*.woff2   -text diff
+*.otf     -text diff

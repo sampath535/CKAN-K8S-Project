@@ -1,3 +1,8 @@
 [submodule "odl-ckan-source"]
 	path = docker/ckan/odl-ckan-source
 	url = https://dongenergy-p.visualstudio.com/DefaultCollection/Orsted%20Data%20Lake/_git/odl-ckan-source
+
+[submodule "ckan-customizations"]
+	path = docker/ckan/ckan-customizations
+	url = https://dongenergy-p@dev.azure.com/dongenergy-p/Orsted%20Data%20Lake/_git/Orsted%20Data%20Lake%20CKAN
+	branch = ckan-customizations-python3
