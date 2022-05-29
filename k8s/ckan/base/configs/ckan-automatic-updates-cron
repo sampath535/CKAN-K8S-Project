@@ -1,0 +1,3 @@
+# m h  dom mon dow   command
+* * * * * . /usr/lib/ckan/.profile; /usr/lib/ckan/orsted-scripts/ckan-automatic-updates.sh >> /var/log/ckan-updates.log 2>&1
+# Empty line

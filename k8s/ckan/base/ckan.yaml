@@ -1,4 +1,3 @@
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -32,7 +31,38 @@ spec:
         app: odeckan
     spec:
       containers:
-        - envFrom:
+        - command:
+          - bash
+          - -c
+          - |
+            set -e
+
+            CONFIG="${CKAN_CONFIG}/production.ini"
+
+            abort () {
+              echo "$@" >&2
+              exit 1
+            }
+            write_config () {
+              echo "Generating config at ${CONFIG}..."
+              ckan generate config "$CONFIG"
+            }
+
+            # If we don't already have a config file, bootstrap
+            if [ ! -e "$CONFIG" ]; then
+              write_config
+            fi
+            
+            ckan --config "$CONFIG" db init
+            ckan --config "$CONFIG" search-index rebuild
+
+            sudo cp $CKAN_HOME/orsted-scripts/ckan-automatic-updates-cron /etc/cron.d/ckan-automatic-updates
+            sudo crontab /etc/cron.d/ckan-automatic-updates
+            env >> $CKAN_HOME/.profile
+            sudo service cron restart
+            ckan -c $CONFIG run --host 0.0.0.0
+
+          envFrom:
           - configMapRef:
               name: ckan-env-vars
           image: ode-ckan-image
@@ -49,18 +79,30 @@ spec:
             limits:
               memory: 2Gi
               cpu: 1000m
-          # volumeMounts:
-          #   - name: kvsecrets
-          #     mountPath: /etc/ckan_secrets
-          #     readOnly: true
+          volumeMounts:
+          - mountPath: /etc/ckan_secrets
+            name: ckan-secrets
+            readOnly: true
+          - mountPath: /usr/lib/ckan/orsted-scripts/ckan-automatic-updates-cron
+            name: ckan-automatic-updates-cron
+            subPath: ckan-automatic-updates-cron
+          - mountPath: /usr/lib/ckan/orsted-scripts/ckan-automatic-updates.sh
+            name: ckan-automatic-updates-sh
+            subPath: ckan-automatic-updates.sh
       restartPolicy: Always
-      # volumes:
-      #   - name: kvsecrets
-      #     csi:
-      #       driver: secrets-store.csi.k8s.io
-      #       readOnly: true
-      #       volumeAttributes:
-      #         secretProviderClass: TBD-OVERLAY-secret-provider
-      #       nodePublishSecretRef:
-      #         name: kvcreds
-
+      volumes:
+      - name: ckan-secrets
+      - name: ckan-automatic-updates-cron
+        configMap:
+          name: ckan-cron
+          items:
+            - key: ckan-automatic-updates-cron
+              path: ckan-automatic-updates-cron
+          defaultMode: 0744
+      - name: ckan-automatic-updates-sh
+        configMap:
+          name: ckan-cron
+          items:
+            - key: ckan-automatic-updates.sh
+              path: ckan-automatic-updates.sh
+          defaultMode: 0744

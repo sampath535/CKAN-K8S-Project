@@ -1,6 +1,5 @@
 # See CKAN docs on installation from Docker Compose on usage
-FROM python:3.8-slim-buster
-MAINTAINER Open Knowledge
+FROM python:3.8
 
 # Install required system packages
 RUN apt-get -q -y update \
@@ -10,6 +9,7 @@ RUN apt-get -q -y update \
         python3-pip \
         python3-venv \
         python3-wheel \
+        net-tools \
         libpq-dev \
         libxml2-dev \
         libxslt-dev \
@@ -22,23 +22,27 @@ RUN apt-get -q -y update \
         vim \
         wget \
         curl \
+        telnet \
+        cron \
+        sudo \
     && apt-get -q clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Define environment variables
 ENV CKAN_HOME=/usr/lib/ckan
-ENV CKAN_VENV=$CKAN_HOME/default
+ENV CKAN_VENV=$CKAN_HOME/orsted-ckan
 ENV CKAN_CONFIG=/etc/ckan
 ENV CKAN_STORAGE_PATH=/var/lib/ckan
-
+ENV CKAN_MSG_BACKUP=$CKAN_HOME/msg-backup
 # Build-time variables specified by docker-compose.yml / .env
 ENV CKAN_SITE_URL=http://localhost:5000
 
 # Create ckan user
-RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/false ckan
+RUN useradd -r -u 900 -m -c "ckan account" -G sudo -d $CKAN_HOME -s /bin/false ckan
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Setup virtual environment for CKAN
-RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH && \
+RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH $CKAN_MSG_BACKUP && \
     python3 -m venv --system-site-packages $CKAN_VENV && \
     ln -s $CKAN_VENV/bin/pip3 /usr/local/bin/ckan-pip3 &&\
     ln -s $CKAN_VENV/bin/ckan /usr/local/bin/ckan
@@ -46,32 +50,28 @@ RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH && \
 # Virtual environment binaries/scripts to be used first
 ENV PATH $CKAN_VENV/bin:$PATH
 
+COPY ckan-entrypoint.sh /
+RUN chmod +x /ckan-entrypoint.sh
+
 # Setup CKAN
-ADD odl-ckan-source/ $CKAN_VENV/src/ckan/
-ADD ckan-customizations/ $CKAN_VENV/src/ckan/ckan-customizations/
+ADD ckan-customizations/ $CKAN_HOME/orsted-scripts/
 RUN . $CKAN_VENV/bin/activate && \
-    ckan-pip3 install -U pip && \
-    ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
-    ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements.txt && \
-    ckan-pip3 install --upgrade --no-cache-dir -e file:./$CKAN_VENV/src/ckan/ckan-customizations/src/ckanext-extrafields && \
-    ckan-pip3 install --upgrade --no-cache-dir -e file:./$CKAN_VENV/src/ckan/ckan-customizations/src/ckanext-theme && \
-    ckan-pip3 install -e $CKAN_VENV/src/ckan/ && \
-    cp -v $CKAN_VENV/src/ckan/contrib/docker/ckan-entrypoint.sh /ckan-entrypoint.sh && \
-    chmod +x /ckan-entrypoint.sh && \
+    ckan-pip3 install setuptools==44.1.0 && \
+    ckan-pip3 install --upgrade pip && \
+    ckan-pip3 install -e 'git+https://github.com/ckan/ckan.git@ckan-2.9.5#egg=ckan[requirements]' && \
+    ckan-pip3 install --upgrade --no-cache-dir -e file:./$CKAN_HOME/orsted-scripts/src/ckanext-extrafields && \
+    ckan-pip3 install --upgrade --no-cache-dir -e file:./$CKAN_HOME/orsted-scripts/src/ckanext-theme && \
+    ckan-pip3 install --upgrade --no-cache-dir -r ./$CKAN_HOME/orsted-scripts/scripts/project_import/requirements/azure.txt && \
     chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
 
-
-WORKDIR $CKAN_VENV/src/ckan/
-
+WORKDIR $CKAN_VENV/
 ENTRYPOINT ["/ckan-entrypoint.sh"]
+
 COPY ./config/production.ini $CKAN_CONFIG/
 COPY ./config/who.ini $CKAN_CONFIG/
 COPY ./config/apache.wsgi $CKAN_CONFIG/
 
 USER ckan
 EXPOSE 5000
-
-# RUN . $CKAN_VENV/bin/activate && python3 $CKAN_VENV/src/ckan/ckan-customizations/src/ckanext-extrafields/setup.py develop
-# RUN . $CKAN_VENV/bin/activate && python3 $CKAN_VENV/src/ckan/ckan-customizations/src/ckanext-theme/setup.py develop
 
 CMD ["ckan","-c","/etc/ckan/production.ini", "run", "--host", "0.0.0.0"]

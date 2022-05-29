@@ -5,7 +5,7 @@
 *.yml eol=lf
 *.ini eol=lf
 *.wsgi eol=lf
-
+*.sh eol=lf
 
 # (binary is a macro for -text -diff)
 *.png binary

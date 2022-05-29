@@ -9,15 +9,22 @@ bases:
 # namespace to deploy all Resources to
 namespace: ode-ckan-test-ns
 
-# resources:
-# - secretprovider.yaml
+resources:
+- secretprovider.yaml
+- ingress.yaml
 
-# patchesStrategicMerge:
-#   - secretconfig.yaml
-#   - resources.yaml
-#   - volumeclaim.yaml  
+patchesStrategicMerge:
+  - secretconfig.yaml
+  - resources.yaml
+  - environment.yaml
 
 # labels added to all Resources
 commonLabels:
   app: odeckan
   env: test
+
+configMapGenerator:
+  - name: ckan-env-vars
+    behavior: merge
+    envs: 
+    - .env

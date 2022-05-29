@@ -109,22 +109,22 @@ stages:
             - template: ci/deploy-steps.yml
               parameters:
                 env: dev
-  # - stage: DeployTEST
-  #   dependsOn: Build
-  #   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
-  #   jobs:
-  #   - deployment: DeployTEST
-  #     displayName: Deploy CKAN TEST
-  #     environment: odl-test-env.ode-ckan-test-ns
-  #     pool:        
-  #       vmImage: 'Ubuntu-18.04'
-  #     strategy:
-  #       runOnce:
-  #         deploy:
-  #           steps:
-  #           - template: ci/deploy-steps.yml
-  #             parameters:
-  #               env: test
+  - stage: DeployTEST
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+    jobs:
+    - deployment: DeployTEST
+      displayName: Deploy CKAN TEST
+      environment: odl-test-env.ode-ckan-test-ns
+      pool:        
+        vmImage: 'Ubuntu-18.04'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - template: ci/deploy-steps.yml
+              parameters:
+                env: test
   # - stage: DeployProd
   #   dependsOn: Build
   #   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
