@@ -75,7 +75,7 @@ stages:
             ../../script/installkustomize.sh
             cp kustomize base
 
-            for env in dev test; do
+            for env in dev test prod; do
 
               target_acr=$(acr_dev)
               if [[ ${env} == "prod" ]]; then
@@ -124,19 +124,18 @@ stages:
             - template: ci/deploy-steps.yml
               parameters:
                 env: test
-  # - stage: DeployProd
-  #   dependsOn: Build
-  #   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
-  #   jobs:
-  #   - deployment: DeployProd
-  #     displayName: Deploy NiFi PROD
-  #     environment: odl-prod-env.ode-ckan-prod-ns
-  #     pool:
-  #       vmImage: 'Ubuntu-18.04'
-  #     strategy:
-  #       runOnce:
-  #         deploy:
-  #           steps:
-  #           - template: ci/deploy-steps.yml
-  #             parameters:
-  #               env: prod
+  - stage: DeployPROD
+    dependsOn: Build
+    jobs:
+    - deployment: DeployPROD
+      displayName: Deploy CKAN PROD
+      environment: odl-test-env.ode-ckan-prod-ns
+      pool:        
+        vmImage: 'Ubuntu-18.04'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - template: ci/deploy-steps.yml
+              parameters:
+                env: prod
