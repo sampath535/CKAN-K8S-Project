@@ -111,7 +111,6 @@ stages:
                 env: dev
   - stage: DeployTEST
     dependsOn: Build
-    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
     jobs:
     - deployment: DeployTEST
       displayName: Deploy CKAN TEST
