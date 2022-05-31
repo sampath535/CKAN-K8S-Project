@@ -75,7 +75,7 @@ stages:
             ../../script/installkustomize.sh
             cp kustomize base
 
-            for env in dev; do
+            for env in dev test; do
 
               target_acr=$(acr_dev)
               if [[ ${env} == "prod" ]]; then
