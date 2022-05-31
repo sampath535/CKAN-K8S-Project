@@ -129,7 +129,7 @@ stages:
     jobs:
     - deployment: DeployPROD
       displayName: Deploy CKAN PROD
-      environment: odl-test-env.ode-ckan-prod-ns
+      environment: odl-prod-env.ode-ckan-prod-ns
       pool:        
         vmImage: 'Ubuntu-18.04'
       strategy:
