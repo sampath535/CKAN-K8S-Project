@@ -49,14 +49,6 @@ steps:
       replicas: 0
       namespace: $(Environment.ResourceName)
   - task: KubernetesManifest@0
-    displayName: Delete deployments
-    continueOnError: 'true'
-    inputs: 
-      action: delete
-      arguments: deployment odeckan odesolr odedatapusher oderedis
-      namespace: $(Environment.ResourceName)
-    
-  - task: KubernetesManifest@0
     displayName: Deploy Data Catalogue
     continueOnError: 'true'
     inputs:
