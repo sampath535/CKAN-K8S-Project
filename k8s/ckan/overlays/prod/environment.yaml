@@ -10,10 +10,9 @@ spec:
     spec:
       containers:
       - name: ode-ckan # (1)
-        resources:
-          requests:
-            memory: 2Gi
-            cpu: 1000m
-          limits:
-            memory: 4Gi
-            cpu: 2000m
+        env:
+        - name: CKAN_SQLALCHEMY_URL
+          valueFrom:
+            secretKeyRef:
+              key: ode-ckan-prod-pg-conn-string
+              name: ode-ckan-prod-secrets

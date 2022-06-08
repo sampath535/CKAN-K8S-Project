@@ -1,0 +1,78 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  name: ode-ckan-ingress-prod
+spec:
+  tls:
+  - hosts:
+    - ode-ckan-prod.de-prod.dk
+    secretName: ode-ckan-prod-ingress-tls
+  - hosts:
+    - data.orsted.com
+    secretName: ode-ckan-data-com-ingress-tls
+  - hosts:
+    - data.orsted.dk
+    secretName: ode-ckan-data-dk-ingress-tls
+  - hosts:
+    - www.data.orsted.dk
+    secretName: ode-ckan-data-www-dk-ingress-tls
+  - hosts:
+    - www.data.orsted.com
+    secretName: ode-ckan-data-www-com-ingress-tls
+  rules:
+  - host: ode-ckan-prod.de-prod.dk
+    http:
+      paths:
+      - backend:
+          service:
+            name: odeckan-service
+            port:
+              number: 5000
+        path: /(.*)
+        pathType: ImplementationSpecific
+  - host: data.orsted.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: odeckan-service
+            port:
+              number: 5000
+        path: /(.*)
+        pathType: ImplementationSpecific
+  - host: data.orsted.dk
+    http:
+      paths:
+      - backend:
+          service:
+            name: odeckan-service
+            port:
+              number: 5000
+        path: /(.*)
+        pathType: ImplementationSpecific
+  - host: www.data.orsted.dk
+    http:
+      paths:
+      - backend:
+          service:
+            name: odeckan-service
+            port:
+              number: 5000
+        path: /(.*)
+        pathType: ImplementationSpecific
+  - host: www.data.orsted.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: odeckan-service
+            port:
+              number: 5000
+        path: /(.*)
+        pathType: ImplementationSpecific
+status: {}
