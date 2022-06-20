@@ -52,7 +52,7 @@ spec:
             if [ ! -e "$CONFIG" ]; then
               write_config
             fi
-            
+          
             ckan --config "$CONFIG" db init
             ckan --config "$CONFIG" search-index rebuild
 
@@ -79,6 +79,17 @@ spec:
             limits:
               memory: 2Gi
               cpu: 1000m
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - 'wget -T2 -O- http://odesolr-service:8983/'
+            initialDelaySeconds: 20
+            timeoutSeconds: 20
+            periodSeconds: 20
+            failureThreshold: 6
+            successThreshold: 2
           volumeMounts:
           - mountPath: /etc/ckan_secrets
             name: ckan-secrets
