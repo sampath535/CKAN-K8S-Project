@@ -1,15 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: odeckan
+  name: odeckan 
 spec:
-  selector:
-    matchLabels:
-      app: odeckan
   template:
     spec:
       containers:
-      - name: ode-ckan # (1)
+      - name: ode-ckan
         resources:
           requests:
             memory: 1Gi

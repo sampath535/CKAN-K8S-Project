@@ -14,31 +14,20 @@ spec:
       targetPort: 8983
   selector:
     app: odesolr
-# ---
-# apiVersion: v1
-# kind: PersistentVolumeClaim
-# metadata:
-#   labels:
-#     app: odesolr
-#   name: odesolr-data-claim-claim
-# spec:
-#   accessModes:
-#     - ReadWriteOnce
-#   resources:
-#     requests:
-#       storage: 10Gi
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  labels:
-    app: odesolr
   name: odesolr
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: odesolr
+  serviceName: odesolr-service
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel #OrderedReady
   template:
     metadata:
       labels:
@@ -59,11 +48,17 @@ spec:
             requests:
               cpu: 500m
               memory: 2Gi
-      #     volumeMounts:
-      #     - mountPath: /opt/solr/server/solr/ckan/data
-      #       name: odesolr-data      
-      # volumes:
-      #   - name: odesolr-data
-      #     persistentVolumeClaim:
-      #       claimName: odesolr-data-claim
+          volumeMounts:
+          - name: odesolr-data
+            mountPath: /opt/solr/server/
+            subPath: data
       restartPolicy: Always
+  volumeClaimTemplates:
+  - metadata:
+      name: odesolr-data
+    spec:
+      accessModes: [ ReadWriteOnce ]
+      storageClassName: ode-solr-sc
+      resources:
+        requests:
+          storage: 64Gi

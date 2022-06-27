@@ -15,16 +15,18 @@ spec:
     app: odeckan
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  labels:
-    app: odeckan
   name: odeckan
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: odeckan
+  serviceName: odeckan-service
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady #Parallel
   template:
     metadata:
       labels:
@@ -94,6 +96,15 @@ spec:
           - mountPath: /etc/ckan_secrets
             name: ckan-secrets
             readOnly: true
+          - name: odeckan-data
+            mountPath: /usr/lib/ckan/
+            subPath: data
+          - name: odeckan-data
+            mountPath: /etc/ckan/
+            subPath: conf
+          - name: odeckan-data
+            mountPath: /var/lib/ckan
+            subPath: storage
           - mountPath: /usr/lib/ckan/orsted-scripts/ckan-automatic-updates-cron
             name: ckan-automatic-updates-cron
             subPath: ckan-automatic-updates-cron
@@ -117,3 +128,12 @@ spec:
             - key: ckan-automatic-updates.sh
               path: ckan-automatic-updates.sh
           defaultMode: 0744
+  volumeClaimTemplates:
+  - metadata:
+      name: odeckan-data
+    spec:
+      accessModes: [ ReadWriteOnce ]
+      storageClassName: ode-ckan-sc
+      resources:
+        requests:
+          storage: 64Gi

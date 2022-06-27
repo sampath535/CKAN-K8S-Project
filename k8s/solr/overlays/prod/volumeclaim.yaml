@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: odesolr
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: odesolr-data # (1)
+    spec:
+      accessModes: [ ReadWriteOnce ]
+      storageClassName: ode-solr-test-hdd-sc
+      resources:
+        requests:
+          storage: 128Gi
