@@ -8,7 +8,7 @@ spec:
       name: odesolr-data # (1)
     spec:
       accessModes: [ ReadWriteOnce ]
-      storageClassName: ode-solr-test-hdd-sc
+      storageClassName: ode-solr-dev-ssd-zrs-sc
       resources:
         requests:
           storage: 32Gi

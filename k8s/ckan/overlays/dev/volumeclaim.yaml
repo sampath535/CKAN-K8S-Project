@@ -8,7 +8,7 @@ spec:
       name: odeckan-data # (1)
     spec:
       accessModes: [ ReadWriteOnce ]
-      storageClassName: ode-ckan-dev-hdd-sc
+      storageClassName: ode-ckan-dev-ssd-zrs-sc
       resources:
         requests:
           storage: 32Gi
