@@ -71,6 +71,10 @@ COPY ./config/production.ini $CKAN_CONFIG/
 COPY ./config/who.ini $CKAN_CONFIG/
 COPY ./config/apache.wsgi $CKAN_CONFIG/
 
+VOLUME ${CKAN_HOME} \
+       ${CKAN_CONFIG} \
+       ${CKAN_STORAGE_PATH} 
+
 USER ckan
 EXPOSE 5000
 
