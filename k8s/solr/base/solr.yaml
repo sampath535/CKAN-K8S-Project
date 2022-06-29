@@ -40,8 +40,7 @@ spec:
           command: 
             - /bin/sh
             - -c
-            - sleep infinity
-            - sudo cp -R /opt/solr/server/solr/configsets/_default /opt/solr/server/solr/configsets/ckan
+            - cp -R /opt/solr/server/solr/configsets/_default /opt/solr/server/solr/configsets/ckan
             - solr-precreate ckan /opt/solr-current/server/solr/configsets
           ports:
             - containerPort: 8983
@@ -85,43 +84,43 @@ spec:
         configMap:
           name: solr-config
           items:
-            - key: currency-xml
-              path: currency-xml
+            - key: currency.xml
+              path: currency.xml
           defaultMode: 0744
       - name: elevate-xml
         configMap:
           name: solr-config
           items:
-            - key: elevate-xml
-              path: elevate-xml
+            - key: elevate.xml
+              path: elevate.xml
           defaultMode: 0744
       - name: protwords-txt
         configMap:
           name: solr-config
           items:
-            - key: protwords-txt
-              path: protwords-txt
+            - key: protwords.txt
+              path: protwords.txt
           defaultMode: 0744
       - name: stopwords-txt
         configMap:
           name: solr-config
           items:
             - key: stopwords-txt
-              path: stopwords-txt
+              path: stopwords.txt
           defaultMode: 0744
       - name: synonyms-txt
         configMap:
           name: solr-config
           items:
-            - key: synonyms-txt
-              path: synonyms-txt
+            - key: synonyms.txt
+              path: synonyms.txt
           defaultMode: 0744
       - name: schema-solr8-xml
         configMap:
           name: solr-config
           items:
-            - key: schema.solr8-xml
-              path: schema.solr8-xml
+            - key: schema.solr8.xml
+              path: schema.solr8.xml
           defaultMode: 0744
       # Solr data
       - name: odesolr-data
