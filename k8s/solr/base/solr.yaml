@@ -54,7 +54,7 @@ spec:
               cpu: 500m
               memory: 2Gi
           volumeMounts:
-          - mountPath: /opt/solr/server/solr/configsets/ckan/
+          - mountPath: /var/solr/data/ckan
             name: odesolr-data
             subPath: server
             # ConfigSets
