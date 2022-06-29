@@ -120,8 +120,8 @@ spec:
         configMap:
           name: solr-config
           items:
-            - key: schema-solr8-xml
-              path: schema-solr8-xml
+            - key: schema.solr8-xml
+              path: schema.solr8-xml
           defaultMode: 0744
       # Solr data
       - name: odesolr-data
