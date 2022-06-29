@@ -37,6 +37,12 @@ spec:
         - image: ode-solr-image
           name: ode-solr
           imagePullPolicy: Always
+          command: 
+            - /bin/sh
+            - -c
+            - sleep infinity
+            - sudo cp -R /opt/solr/server/solr/configsets/_default /opt/solr/server/solr/configsets/ckan
+            - solr-precreate ckan /opt/solr-current/server/solr/configsets
           ports:
             - containerPort: 8983
               name: socket
@@ -49,16 +55,75 @@ spec:
               cpu: 500m
               memory: 2Gi
           volumeMounts:
-          - name: odesolr-data
-            mountPath: /opt/solr/server/
-            subPath: data
+          - mountPath: /opt/solr/server/solr/configsets/ckan/
+            name: odesolr-data
+            subPath: server
+            # ConfigSets
+          - mountPath: /opt/solr/server/solr/configsets/currency.xml
+            name: currency-xml
+            subPath: currency.xml
+          - mountPath: /opt/solr/server/solr/configsets/synonyms.txt
+            name: synonyms-txt
+            subPath: synonyms.txt
+          - mountPath: /opt/solr/server/solr/configsets/stopwords.txt
+            name: stopwords-txt
+            subPath: stopwords.txt
+          - mountPath: /opt/solr/server/solr/configsets/protwords.txt
+            name: protwords-txt
+            subPath: protwords.txt
+          - mountPath: /opt/solr/server/solr/configsets/elevate.xml
+            name: elevate-xml
+            subPath: elevate.xml
+            #Schema
+          - mountPath: /opt/solr/server/solr/configsets/schema.solr8.xml
+            name: schema-solr8-xml
+            subPath: schema.solr8.xml
       restartPolicy: Always
-  volumeClaimTemplates:
-  - metadata:
-      name: odesolr-data
-    spec:
-      accessModes: [ ReadWriteOnce ]
-      storageClassName: ode-solr-sc
-      resources:
-        requests:
-          storage: 64Gi
+      volumes:
+      - name: ckan-secrets
+      - name: currency-xml
+        configMap:
+          name: solr-config
+          items:
+            - key: currency-xml
+              path: currency-xml
+          defaultMode: 0744
+      - name: elevate-xml
+        configMap:
+          name: solr-config
+          items:
+            - key: elevate-xml
+              path: elevate-xml
+          defaultMode: 0744
+      - name: protwords-txt
+        configMap:
+          name: solr-config
+          items:
+            - key: protwords-txt
+              path: protwords-txt
+          defaultMode: 0744
+      - name: stopwords-txt
+        configMap:
+          name: solr-config
+          items:
+            - key: stopwords-txt
+              path: stopwords-txt
+          defaultMode: 0744
+      - name: synonyms-txt
+        configMap:
+          name: solr-config
+          items:
+            - key: synonyms-txt
+              path: synonyms-txt
+          defaultMode: 0744
+      - name: schema-solr8-xml
+        configMap:
+          name: solr-config
+          items:
+            - key: schema-solr8-xml
+              path: schema-solr8-xml
+          defaultMode: 0744
+      # Solr data
+      - name: odesolr-data
+        persistentVolumeClaim:
+          claimName: odesolr-data-claim

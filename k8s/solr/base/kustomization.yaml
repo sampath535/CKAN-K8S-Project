@@ -23,3 +23,13 @@ generatorOptions:
   # suffix to the names of generated resources that is a hash of
   # the resource contents.
   disableNameSuffixHash: true
+
+configMapGenerator:
+- files:
+  - configs/currency.xml
+  - configs/elevate.xml
+  - configs/protwords.txt
+  - configs/schema.solr8.xml
+  - configs/stopwords.txt
+  - configs/synonyms.txt
+  name: solr-config

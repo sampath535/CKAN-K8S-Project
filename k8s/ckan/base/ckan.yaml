@@ -137,3 +137,19 @@ spec:
       resources:
         requests:
           storage: 64Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nifiregistry-data-claim
+  labels:
+    app: nifiregistry
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: odl-nifi-sc
+  resources:
+    requests:
+      storage: 10Gi
+---

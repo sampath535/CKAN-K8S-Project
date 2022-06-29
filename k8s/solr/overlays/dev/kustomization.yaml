@@ -9,8 +9,11 @@ bases:
 # namespace to deploy all Resources to
 namespace: ode-ckan-dev-ns
 
-patchesStrategicMerge:
-  - volumeclaim.yaml  
+# resources:
+#   - volumeclaim.yaml  
+
+# patchesStrategicMerge:
+#   - volumeclaim.yaml  
 
 # labels added to all Resources
 commonLabels:
