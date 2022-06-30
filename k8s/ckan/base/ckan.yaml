@@ -93,18 +93,11 @@ spec:
             failureThreshold: 6
             successThreshold: 2
           volumeMounts:
-          - mountPath: /etc/ckan_secrets
-            name: ckan-secrets
+          - name: ckan-secrets
+            mountPath: /etc/ckan_secrets
             readOnly: true
-          - name: odeckan-data
-            mountPath: /usr/lib/ckan/
-            subPath: data
-          - name: odeckan-data
-            mountPath: /etc/ckan/
-            subPath: conf
-          - name: odeckan-data
-            mountPath: /var/lib/ckan
-            subPath: storage
+          - mountPath: /var/lib/ckan/msg-backup
+            name: odeckan-data
           - mountPath: /usr/lib/ckan/orsted-scripts/ckan-automatic-updates-cron
             name: ckan-automatic-updates-cron
             subPath: ckan-automatic-updates-cron
@@ -137,19 +130,3 @@ spec:
       resources:
         requests:
           storage: 64Gi
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nifiregistry-data-claim
-  labels:
-    app: nifiregistry
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: odl-nifi-sc
-  resources:
-    requests:
-      storage: 10Gi
----
