@@ -33,7 +33,7 @@ ENV CKAN_HOME=/usr/lib/ckan
 ENV CKAN_VENV=$CKAN_HOME/orsted-ckan
 ENV CKAN_CONFIG=/etc/ckan
 ENV CKAN_STORAGE_PATH=/var/lib/ckan
-ENV CKAN_MSG_BACKUP=$CKAN_HOME/msg-backup
+ENV CKAN_MSG_BACKUP=/var/lib/ckan/msg-backup
 # Build-time variables specified by docker-compose.yml / .env
 ENV CKAN_SITE_URL=http://localhost:5000
 
@@ -70,10 +70,6 @@ ENTRYPOINT ["/ckan-entrypoint.sh"]
 COPY ./config/production.ini $CKAN_CONFIG/
 COPY ./config/who.ini $CKAN_CONFIG/
 COPY ./config/apache.wsgi $CKAN_CONFIG/
-
-VOLUME ${CKAN_HOME} \
-       ${CKAN_CONFIG} \
-       ${CKAN_STORAGE_PATH} 
 
 USER ckan
 EXPOSE 5000
