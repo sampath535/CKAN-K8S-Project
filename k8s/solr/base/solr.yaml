@@ -27,25 +27,22 @@ spec:
   replicas: 1
   updateStrategy:
     type: RollingUpdate
-  podManagementPolicy: Parallel #OrderedReady
+  podManagementPolicy: OrderedReady #Parallel
   template:
     metadata:
       labels:
-        app: odesolr
+        app: odeckan
     spec:
+      securityContext:
+        runAsUser: 1001
+        fsGroup: 1001
       containers:
-        - image: ode-solr-image
-          name: ode-solr
-          imagePullPolicy: Always
-          command: 
-            - /bin/sh
-            - -c
-            - cp -R /opt/solr/server/solr/configsets/_default /opt/solr/server/solr/configsets/ckan
-            - solr-precreate ckan /opt/solr-current/server/solr/configsets
+        - name: ode-solr
+          image: ode-solr-image
           ports:
-            - containerPort: 8983
-              name: socket
-              protocol: TCP
+          - containerPort: 8983
+            name: socket
+            protocol: TCP
           resources:
             limits:
               cpu: 500m
@@ -54,75 +51,94 @@ spec:
               cpu: 500m
               memory: 2Gi
           volumeMounts:
-          - mountPath: /var/solr/data/ckan
-            name: odesolr-data
-            subPath: server
-            # ConfigSets
-          - mountPath: /opt/solr/server/solr/configsets/currency.xml
-            name: currency-xml
-            subPath: currency.xml
-          - mountPath: /opt/solr/server/solr/configsets/synonyms.txt
-            name: synonyms-txt
-            subPath: synonyms.txt
-          - mountPath: /opt/solr/server/solr/configsets/stopwords.txt
-            name: stopwords-txt
-            subPath: stopwords.txt
-          - mountPath: /opt/solr/server/solr/configsets/protwords.txt
-            name: protwords-txt
-            subPath: protwords.txt
-          - mountPath: /opt/solr/server/solr/configsets/elevate.xml
-            name: elevate-xml
-            subPath: elevate.xml
-            #Schema
-          - mountPath: /opt/solr/server/solr/configsets/schema.solr8.xml
-            name: schema-solr8-xml
-            subPath: schema.solr8.xml
-      restartPolicy: Always
+            - name: odesolr-data
+              mountPath: /var/solr
+            - mountPath: /opt/solr/server/solr/configsets/currency.xml
+              name: currency-xml
+              subPath: currency.xml
+            - mountPath: /opt/solr/server/solr/configsets/synonyms.txt
+              name: synonyms-txt
+              subPath: synonyms.txt
+            - mountPath: /opt/solr/server/solr/configsets/stopwords.txt
+              name: stopwords-txt
+              subPath: stopwords.txt
+            - mountPath: /opt/solr/server/solr/configsets/protwords.txt
+              name: protwords-txt
+              subPath: protwords.txt
+            - mountPath: /opt/solr/server/solr/configsets/elevate.xml
+              name: elevate-xml
+              subPath: elevate.xml
+            - mountPath: /opt/solr/server/solr/configsets/ckan/conf/managed-schema.txt
+              name: schema-solr8-xml
+              subPath: managed-schema.txt
+          livenessProbe:
+            # runs a built-in script to check for Solr readiness/liveness
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - "/opt/docker-solr/scripts/wait-for-solr.sh"
+            initialDelaySeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            # runs a built-in script to check for Solr readiness/liveness
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - "/opt/docker-solr/scripts/wait-for-solr.sh"
+            initialDelaySeconds: 20
+            timeoutSeconds: 5
       volumes:
       - name: ckan-secrets
-      - name: currency-xml
-        configMap:
-          name: solr-config
+      - configMap:
+          defaultMode: 484
           items:
-            - key: currency.xml
-              path: currency.xml
-          defaultMode: 0744
-      - name: elevate-xml
-        configMap:
+          - key: currency.xml
+            path: currency.xml
           name: solr-config
+        name: currency-xml
+      - configMap:
+          defaultMode: 484
           items:
-            - key: elevate.xml
-              path: elevate.xml
-          defaultMode: 0744
-      - name: protwords-txt
-        configMap:
+          - key: elevate.xml
+            path: elevate.xml
           name: solr-config
+        name: elevate-xml
+      - configMap:
+          defaultMode: 484
           items:
-            - key: protwords.txt
-              path: protwords.txt
-          defaultMode: 0744
-      - name: stopwords-txt
-        configMap:
+          - key: protwords.txt
+            path: protwords.txt
           name: solr-config
+        name: protwords-txt
+      - configMap:
+          defaultMode: 484
           items:
-            - key: stopwords-txt
-              path: stopwords.txt
-          defaultMode: 0744
-      - name: synonyms-txt
-        configMap:
+          - key: stopwords.txt
+            path: stopwords.txt
           name: solr-config
+        name: stopwords-txt
+      - configMap:
+          defaultMode: 484
           items:
-            - key: synonyms.txt
-              path: synonyms.txt
-          defaultMode: 0744
-      - name: schema-solr8-xml
-        configMap:
+          - key: synonyms.txt
+            path: synonyms.txt
           name: solr-config
+        name: synonyms-txt
+      - configMap:
+          defaultMode: 484
           items:
-            - key: schema.solr8.xml
-              path: schema.solr8.xml
-          defaultMode: 0744
-      # Solr data
-      - name: odesolr-data
-        persistentVolumeClaim:
-          claimName: odesolr-data-claim
+          - key: schema.solr8.xml
+            path: schema.solr8.xml
+          name: solr-config
+        name: schema-solr8-xml
+  volumeClaimTemplates:
+  - metadata:
+      name: odesolr-data
+    spec:
+      accessModes: [ ReadWriteOnce ]
+      storageClassName: ode-solr-sc
+      resources:
+        requests:
+          storage: 64Gi
