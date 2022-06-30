@@ -31,7 +31,7 @@ spec:
   template:
     metadata:
       labels:
-        app: odeckan
+        app: odesolr
     spec:
       securityContext:
         runAsUser: 1001
@@ -90,7 +90,6 @@ spec:
             initialDelaySeconds: 20
             timeoutSeconds: 5
       volumes:
-      - name: ckan-secrets
       - configMap:
           defaultMode: 484
           items:
