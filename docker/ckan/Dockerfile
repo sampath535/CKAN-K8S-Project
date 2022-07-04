@@ -33,7 +33,7 @@ ENV CKAN_HOME=/usr/lib/ckan
 ENV CKAN_VENV=$CKAN_HOME/orsted-ckan
 ENV CKAN_CONFIG=/etc/ckan
 ENV CKAN_STORAGE_PATH=/var/lib/ckan
-ENV CKAN_MSG_BACKUP=/var/lib/ckan/msg-backup
+ENV CKAN_MSG_BACKUP=/var/lib/ckan-backup
 # Build-time variables specified by docker-compose.yml / .env
 ENV CKAN_SITE_URL=http://localhost:5000
 

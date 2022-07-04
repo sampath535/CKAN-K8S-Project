@@ -96,7 +96,7 @@ spec:
           - name: ckan-secrets
             mountPath: /etc/ckan_secrets
             readOnly: true
-          - mountPath: /var/lib/ckan/msg-backup
+          - mountPath: /var/lib/ckan-backup
             name: odeckan-data
           - mountPath: /usr/lib/ckan/orsted-scripts/ckan-automatic-updates-cron
             name: ckan-automatic-updates-cron
