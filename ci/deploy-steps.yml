@@ -16,12 +16,6 @@ steps:
       replicas: 0
       namespace: $(Environment.ResourceName)    
   - task: KubernetesManifest@0
-    displayName: Stop CKAN Pods
-    inputs:
-      action: delete
-      arguments: pod -l app=odeckan
-      namespace: $(Environment.ResourceName)
-  - task: KubernetesManifest@0
     displayName: Scale datapusher down
     continueOnError: 'true'
     inputs: 
@@ -49,13 +43,20 @@ steps:
       replicas: 0
       namespace: $(Environment.ResourceName)
   - task: KubernetesManifest@0
-    displayName: Deploy Data Catalogue
+    displayName: Deploy Solr, Redis, Datapusher
+    continueOnError: 'true'
+    inputs:
+      action: deploy
+      namespace: $(Environment.ResourceName)
+      manifests: |
+        $(Pipeline.Workspace)/drop/solr_*.yaml
+        $(Pipeline.Workspace)/drop/redis_*.yaml
+        $(Pipeline.Workspace)/drop/datapusher_*.yaml
+  - task: KubernetesManifest@0
+    displayName: Deploy CKAN
     continueOnError: 'true'
     inputs:
       action: deploy
       namespace: $(Environment.ResourceName)
       manifests: |
         $(Pipeline.Workspace)/drop/ckan_*.yaml
-        $(Pipeline.Workspace)/drop/solr_*.yaml
-        $(Pipeline.Workspace)/drop/redis_*.yaml
-        $(Pipeline.Workspace)/drop/datapusher_*.yaml
