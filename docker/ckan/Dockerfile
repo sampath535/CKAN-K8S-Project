@@ -59,6 +59,7 @@ RUN . $CKAN_VENV/bin/activate && \
     ckan-pip3 install setuptools==44.1.0 && \
     ckan-pip3 install --upgrade pip && \
     ckan-pip3 install -e 'git+https://github.com/ckan/ckan.git@ckan-2.9.5#egg=ckan[requirements]' && \
+    ckan-pip3 install gunicorn && \
     ckan-pip3 install --upgrade --no-cache-dir -e file:./$CKAN_HOME/orsted-scripts/src/ckanext-extrafields && \
     ckan-pip3 install --upgrade --no-cache-dir -e file:./$CKAN_HOME/orsted-scripts/src/ckanext-theme && \
     ckan-pip3 install --upgrade --no-cache-dir -r ./$CKAN_HOME/orsted-scripts/scripts/project_import/requirements/azure.txt && \

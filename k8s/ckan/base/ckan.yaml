@@ -62,7 +62,7 @@ spec:
             sudo crontab /etc/cron.d/ckan-automatic-updates
             env >> $CKAN_HOME/.profile
             sudo service cron restart
-            ckan -c $CONFIG run --host 0.0.0.0
+            gunicorn --bind 0.0.0.0:5000 wsgi:application
 
           envFrom:
           - configMapRef:
