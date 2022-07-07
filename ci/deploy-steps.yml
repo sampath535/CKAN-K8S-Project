@@ -11,34 +11,16 @@ steps:
     continueOnError: 'true'
     inputs: 
       action: scale
-      kind: Deployment
+      kind: Statefulset
       name: odeckan
       replicas: 0
       namespace: $(Environment.ResourceName)    
-  - task: KubernetesManifest@0
-    displayName: Scale datapusher down
-    continueOnError: 'true'
-    inputs: 
-      action: scale
-      kind: Deployment
-      name: odedatapusher
-      replicas: 0
-      namespace: $(Environment.ResourceName) 
-  - task: KubernetesManifest@0
-    displayName: Scale redis down
-    continueOnError: 'true'
-    inputs: 
-      action: scale
-      kind: Deployment
-      name: oderedis
-      replicas: 0
-      namespace: $(Environment.ResourceName)
   - task: KubernetesManifest@0
     displayName: Scale solr down
     continueOnError: 'true'
     inputs: 
       action: scale
-      kind: Deployment
+      kind: StatefulSet
       name: odesolr
       replicas: 0
       namespace: $(Environment.ResourceName)
