@@ -30,6 +30,11 @@ configMapGenerator:
   - configs/ckan-automatic-updates.sh
   - configs/ckan-automatic-updates-cron
   name: ckan-cron
+- files:
+  - configs/apache.wsgi
+  - configs/who.ini
+  - configs/production.ini
+  name: ckan-config
 - envs:
   - .env.template
   name: ckan-env-vars

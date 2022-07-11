@@ -98,6 +98,15 @@ spec:
             readOnly: true
           - mountPath: /var/lib/ckan-backup
             name: odeckan-data
+          - mountPath: /etc/ckan/production.ini
+            name: production-ini
+            subPath: production.ini
+          - mountPath: /etc/ckan/who.ini
+            name: who-ini
+            subPath: who.ini
+          - mountPath: /etc/ckan/apache.wsgi
+            name: apache-wsgi
+            subPath: apache.wsgi
           - mountPath: /usr/lib/ckan/orsted-scripts/ckan-automatic-updates-cron
             name: ckan-automatic-updates-cron
             subPath: ckan-automatic-updates-cron
@@ -121,6 +130,25 @@ spec:
             - key: ckan-automatic-updates.sh
               path: ckan-automatic-updates.sh
           defaultMode: 0744
+      - name: production-ini
+        configMap:
+          name: ckan-config
+          items:
+            - key: production.ini
+              path: production.ini
+          defaultMode: 0744
+      - name: who-ini
+        configMap:
+          name: ckan-config
+          items:
+            - key: who.ini
+              path: who.ini
+      - name: apache-wsgi
+        configMap:
+          name: ckan-config
+          items:
+            - key: apache.wsgi
+              path: apache.wsgi
   volumeClaimTemplates:
   - metadata:
       name: odeckan-data

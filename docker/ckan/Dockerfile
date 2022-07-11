@@ -68,10 +68,6 @@ RUN . $CKAN_VENV/bin/activate && \
 WORKDIR $CKAN_VENV/
 ENTRYPOINT ["/ckan-entrypoint.sh"]
 
-COPY ./config/production.ini $CKAN_CONFIG/
-COPY ./config/who.ini $CKAN_CONFIG/
-COPY ./config/apache.wsgi $CKAN_CONFIG/
-
 USER ckan
 EXPOSE 5000
 
