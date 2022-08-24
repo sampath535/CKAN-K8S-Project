@@ -14,10 +14,7 @@ resources:
 - ingress.yaml
 
 patchesStrategicMerge:
-  - secretconfig.yaml
   - resources.yaml
-  - environment.yaml
-  - volumeclaim.yaml  
 
 # labels added to all Resources
 commonLabels:

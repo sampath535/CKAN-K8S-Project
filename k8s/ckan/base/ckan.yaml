@@ -15,18 +15,16 @@ spec:
     app: odeckan
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
+  labels:
+    app: odeckan
   name: odeckan
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: odeckan
-  serviceName: odeckan-service
-  replicas: 1
-  updateStrategy:
-    type: RollingUpdate
-  podManagementPolicy: OrderedReady #Parallel
   template:
     metadata:
       labels:
@@ -58,15 +56,17 @@ spec:
             ckan --config "$CONFIG" db init
             ckan --config "$CONFIG" search-index rebuild
 
-            sudo cp $CKAN_HOME/orsted-scripts/ckan-automatic-updates-cron /etc/cron.d/ckan-automatic-updates
-            sudo crontab /etc/cron.d/ckan-automatic-updates
-            env >> $CKAN_HOME/.profile
-            sudo service cron restart
             gunicorn --bind 0.0.0.0:5000 wsgi:application
 
           envFrom:
           - configMapRef:
               name: ckan-env-vars
+          env:
+          - name: CKAN_SQLALCHEMY_URL
+            valueFrom:
+              secretKeyRef:
+                key: ode-ckan-pg-conn-string
+                name: ode-pg-secrets
           image: ode-ckan-image
           name: ode-ckan
           imagePullPolicy: Always
@@ -96,8 +96,6 @@ spec:
           - name: ckan-secrets
             mountPath: /etc/ckan_secrets
             readOnly: true
-          - mountPath: /var/lib/ckan-backup
-            name: odeckan-data
           - mountPath: /etc/ckan/production.ini
             name: production-ini
             subPath: production.ini
@@ -107,29 +105,8 @@ spec:
           - mountPath: /etc/ckan/apache.wsgi
             name: apache-wsgi
             subPath: apache.wsgi
-          - mountPath: /usr/lib/ckan/orsted-scripts/ckan-automatic-updates-cron
-            name: ckan-automatic-updates-cron
-            subPath: ckan-automatic-updates-cron
-          - mountPath: /usr/lib/ckan/orsted-scripts/ckan-automatic-updates.sh
-            name: ckan-automatic-updates-sh
-            subPath: ckan-automatic-updates.sh
       restartPolicy: Always
       volumes:
-      - name: ckan-secrets
-      - name: ckan-automatic-updates-cron
-        configMap:
-          name: ckan-cron
-          items:
-            - key: ckan-automatic-updates-cron
-              path: ckan-automatic-updates-cron
-          defaultMode: 0744
-      - name: ckan-automatic-updates-sh
-        configMap:
-          name: ckan-cron
-          items:
-            - key: ckan-automatic-updates.sh
-              path: ckan-automatic-updates.sh
-          defaultMode: 0744
       - name: production-ini
         configMap:
           name: ckan-config
@@ -149,12 +126,73 @@ spec:
           items:
             - key: apache.wsgi
               path: apache.wsgi
-  volumeClaimTemplates:
-  - metadata:
-      name: odeckan-data
+      - csi:
+          driver: secrets-store.csi.k8s.io
+          nodePublishSecretRef:
+            name: kvcreds
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "ode-ckan-secretprovider"
+        name: ckan-secrets
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata: 
+  labels:
+    app: odeckan-cron
+  name: odeckan-cron
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
+  jobTemplate: 
     spec:
-      accessModes: [ ReadWriteOnce ]
-      storageClassName: ode-ckan-sc
-      resources:
-        requests:
-          storage: 64Gi
+      backoffLimit: 0
+      template: 
+        spec: 
+          containers: 
+            - command:
+              - bash
+              - -c
+              - |
+                set -e
+                . /usr/lib/ckan/orsted-ckan/bin/activate
+
+                export API_KEY=$(cat /etc/ckan_secrets/CKAN_API_KEY)
+                export PYTHONWARNINGS="ignore:Unverified HTTPS request"
+                export AZURE_CLIENT_ID=$(cat /etc/ckan_secrets/CKAN_CLIENT_ID)
+                export AZURE_CLIENT_SECRET=$(cat /etc/ckan_secrets/CKAN_CLIENT_SECRET)
+
+                site_url="$CKAN_SITE_URL"/api/3
+                queue_url="$AZURE_QUEUE_URL"
+                storage_url="$AZURE_STORAGE_URL"
+                
+                python3 /usr/lib/ckan/orsted-scripts/scripts/project_import/main.py --api-key $API_KEY --url $site_url --ssl-no-verify --azure-queue-name ckan --azure-queue-archive-wasb $storage_url --azure-queue-url $queue_url 
+
+              envFrom:
+              - configMapRef:
+                  name: ckan-env-vars
+              image: ode-ckan-image
+              name: ode-ckan-automatic-updates
+              resources:
+                requests:
+                  memory: 1Gi
+                  cpu: 500m
+                limits:
+                  memory: 2Gi
+                  cpu: 1000m
+              volumeMounts:
+              - name: ckan-secrets
+                mountPath: /etc/ckan_secrets
+                readOnly: true
+          restartPolicy: Never
+          volumes:
+          - csi:
+              driver: secrets-store.csi.k8s.io
+              nodePublishSecretRef:
+                name: kvcreds
+              readOnly: true
+              volumeAttributes:
+                secretProviderClass: "ode-ckan-secretprovider"
+            name: ckan-secrets
+  schedule: "*/2 * * * *"

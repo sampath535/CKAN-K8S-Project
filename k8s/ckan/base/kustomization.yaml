@@ -16,7 +16,6 @@ images:
 
 # labels added to all Resources
 commonLabels:
-  app: odeckan
   env: tbd-in-overlays
 
 generatorOptions:
@@ -26,10 +25,6 @@ generatorOptions:
   disableNameSuffixHash: true
 
 configMapGenerator:
-- files:
-  - configs/ckan-automatic-updates.sh
-  - configs/ckan-automatic-updates-cron
-  name: ckan-cron
 - files:
   - configs/apache.wsgi
   - configs/who.ini

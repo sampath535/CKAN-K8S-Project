@@ -7,24 +7,6 @@ steps:
     artifact: drop
     patterns: '**/*_${{ parameters.env }}.yaml'
   - task: KubernetesManifest@0
-    displayName: Scale CKAN down
-    continueOnError: 'true'
-    inputs: 
-      action: scale
-      kind: Statefulset
-      name: odeckan
-      replicas: 0
-      namespace: $(Environment.ResourceName)    
-  - task: KubernetesManifest@0
-    displayName: Scale solr down
-    continueOnError: 'true'
-    inputs: 
-      action: scale
-      kind: StatefulSet
-      name: odesolr
-      replicas: 0
-      namespace: $(Environment.ResourceName)
-  - task: KubernetesManifest@0
     displayName: Deploy Solr, Redis, Datapusher
     continueOnError: 'true'
     inputs:
