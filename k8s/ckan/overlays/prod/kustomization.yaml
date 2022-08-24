@@ -18,7 +18,6 @@ patchesStrategicMerge:
 
 # labels added to all Resources
 commonLabels:
-  app: odeckan
   env: prod
 
 configMapGenerator:
