@@ -1,4 +1,4 @@
 [submodule "ckan-customizations"]
 	path = docker/ckan/ckan-customizations
-	url = ../Orsted%20Data%20Lake%20CKAN.git
+	url = https://dongenergy-p.visualstudio.com/DefaultCollection/Orsted%20Data%20Lake/_git/Orsted%20Data%20Lake%20CKAN
 	branch = ckan-customizations-python3
