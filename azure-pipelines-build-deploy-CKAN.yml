@@ -14,7 +14,7 @@ stages:
     jobs:
     - job: BuildJob
       pool:
-        vmImage: 'ubuntu-18.04'
+        vmImage: 'windows-latest'
       strategy:
         matrix:
           ckan:
@@ -41,17 +41,14 @@ stages:
       - task: AzureCLI@2
         displayName: 'Push Image ACR DEV'
         inputs:
-          scriptType: bash
+          scriptType: ps
           azureSubscription: datalake-acr-sc-dev
           scriptLocation: inlineScript
           inlineScript: |
-            set -xe
             az acr login --name $(acr_dev)
             docker tag $(docker_image_label) $(acr_dev).azurecr.io/$(docker_image_label).$(Build.BuildId)
             docker push $(acr_dev).azurecr.io/$(docker_image_label).$(Build.BuildId)
 
-            acr_repo=$(echo $(docker_image_label) | cut -d : -f 1)
-            echo The most recent DEV tag is: ${acr_repo}.$(az acr repository show-tags -n $(acr_dev) --top 1 --repository ${acr_repo} --orderby time_desc --output tsv)
           workingDirectory: ./docker/$(app)
 
       - task: AzureCLI@1
