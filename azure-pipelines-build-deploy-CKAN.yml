@@ -38,9 +38,10 @@ stages:
       - script: docker build . -t $(docker_image_label)
         displayName: Build Image
         workingDirectory: ./docker/$(app)
-      - task: AzureCLI@1
+      - task: AzureCLI@2
         displayName: 'Push Image ACR DEV'
         inputs:
+          scriptType: bash
           azureSubscription: datalake-acr-sc-dev
           scriptLocation: inlineScript
           inlineScript: |
