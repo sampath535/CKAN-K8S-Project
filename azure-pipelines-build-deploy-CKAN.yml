@@ -14,7 +14,7 @@ stages:
     jobs:
     - job: BuildJob
       pool:
-        vmImage: 'windows-2019'
+        vmImage: 'Ubuntu-18.04'
       strategy:
         matrix:
           ckan:
