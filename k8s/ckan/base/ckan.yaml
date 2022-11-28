@@ -30,6 +30,7 @@ spec:
       labels:
         app: odeckan
     spec:
+      serviceAccount: ode-ckan-kv-access
       containers:
         - command:
           - bash
@@ -55,7 +56,7 @@ spec:
           
             ckan --config "$CONFIG" db init
             ckan --config "$CONFIG" search-index rebuild
-
+            cd src/ckan/
             gunicorn --bind 0.0.0.0:5000 wsgi:application
 
           envFrom:
@@ -128,8 +129,6 @@ spec:
               path: apache.wsgi
       - csi:
           driver: secrets-store.csi.k8s.io
-          nodePublishSecretRef:
-            name: kvcreds
           readOnly: true
           volumeAttributes:
             secretProviderClass: "ode-ckan-secretprovider"
@@ -149,7 +148,8 @@ spec:
     spec:
       backoffLimit: 0
       template: 
-        spec: 
+        spec:
+          serviceAccount: ode-ckan-kv-access
           containers: 
             - command:
               - bash
@@ -189,8 +189,6 @@ spec:
           volumes:
           - csi:
               driver: secrets-store.csi.k8s.io
-              nodePublishSecretRef:
-                name: kvcreds
               readOnly: true
               volumeAttributes:
                 secretProviderClass: "ode-ckan-secretprovider"

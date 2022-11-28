@@ -12,6 +12,7 @@ namespace: ode-ckan-test-ns
 resources:
 - secretprovider.yaml
 - ingress.yaml
+- serviceaccount.yaml
 
 patchesStrategicMerge:
   - resources.yaml

@@ -1,13 +1,13 @@
-trigger: none
-  # branches:
-  #   include:
-  #   - main
-  # paths:
-  #   include:
-  #   - docker/*
-  #   - k8s/*
-  #   - ci/*
-  #   - azure-pipelines-build-deploy-CKAN.yml
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - docker/*
+    - k8s/*
+    - ci/*
+    - azure-pipelines-build-deploy-CKAN.yml
     
 stages:
   - stage: Build
