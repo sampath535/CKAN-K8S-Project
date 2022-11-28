@@ -41,7 +41,7 @@ stages:
       - task: AzureCLI@2
         displayName: 'Push Image ACR DEV'
         inputs:
-          scriptType: ps
+          scriptType: bash
           azureSubscription: datalake-acr-sc-dev
           scriptLocation: inlineScript
           inlineScript: |
@@ -51,9 +51,10 @@ stages:
 
           workingDirectory: ./docker/$(app)
 
-      - task: AzureCLI@1
+      - task: AzureCLI@2
         displayName: 'Push Image ACR PROD'
         inputs:
+          scriptType: bash
           azureSubscription: datalake-acr-sc-prod
           scriptLocation: inlineScript
           inlineScript: |
