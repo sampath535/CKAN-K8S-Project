@@ -8,6 +8,7 @@ spec:
       app: odeckan
   template:
     spec:
+      serviceAccount: ode-ckan-kv-access
       containers:
       - name: ode-ckan # (1)
         resources:

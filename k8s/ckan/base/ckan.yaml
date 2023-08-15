@@ -30,7 +30,7 @@ spec:
       labels:
         app: odeckan
     spec:
-      serviceAccount: ode-ckan-kv-access
+      # serviceAccount: ode-ckan-kv-access
       containers:
         - command:
           - bash
@@ -149,7 +149,6 @@ spec:
       backoffLimit: 0
       template: 
         spec:
-          serviceAccount: ode-ckan-kv-access
           containers: 
             - command:
               - bash

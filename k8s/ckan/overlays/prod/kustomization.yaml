@@ -12,7 +12,8 @@ namespace: ode-ckan-prod-ns
 resources:
 - secretprovider.yaml
 - ingress.yaml
-- serviceaccount.yaml
+# (uncomment below to use workload identity)
+# - serviceaccount.yaml
 
 patchesStrategicMerge:
   - resources.yaml

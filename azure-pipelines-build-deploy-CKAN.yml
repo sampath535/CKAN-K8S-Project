@@ -8,13 +8,18 @@ trigger:
     - k8s/*
     - ci/*
     - azure-pipelines-build-deploy-CKAN.yml
-    
+resources:
+  repositories:
+    - repository: Orsted Data Lake CKAN
+      type: git
+      name: Orsted Data Lake CKAN
+      ref: 'ckan-customizations-python3'
 stages:
   - stage: Build
     jobs:
     - job: BuildJob
       pool:
-        vmImage: 'Ubuntu-18.04'
+        vmImage: 'Ubuntu-22.04'
       strategy:
         matrix:
           ckan:
@@ -99,7 +104,7 @@ stages:
     - deployment: DeployDEV
       displayName: Deploy CKAN DEV
       pool:
-        vmImage: 'Ubuntu-18.04'
+        vmImage: 'Ubuntu-22.04'
       environment:  odl-dev-env.ode-ckan-dev-ns
       strategy:
         runOnce:
@@ -115,7 +120,7 @@ stages:
       displayName: Deploy CKAN TEST
       environment: odl-test-env.ode-ckan-test-ns
       pool:        
-        vmImage: 'Ubuntu-18.04'
+        vmImage: 'Ubuntu-22.04'
       strategy:
         runOnce:
           deploy:
@@ -130,7 +135,7 @@ stages:
       displayName: Deploy CKAN PROD
       environment: odl-prod-env.ode-ckan-prod-ns
       pool:        
-        vmImage: 'Ubuntu-18.04'
+        vmImage: 'Ubuntu-22.04'
       strategy:
         runOnce:
           deploy:
